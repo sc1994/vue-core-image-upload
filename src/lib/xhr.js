@@ -2,15 +2,15 @@
  * simple ajax handler
  **/
 
- //ADD sendAsBinary compatibilty to older browsers
- if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
-   XMLHttpRequest.prototype.sendAsBinary = function(string) {
-     var bytes = Array.prototype.map.call(string, function(c) {
-         return c.charCodeAt(0) & 0xff;
-     });
-     this.send(new Uint8Array(bytes).buffer);
-   };
- }
+//ADD sendAsBinary compatibilty to older browsers
+if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
+  XMLHttpRequest.prototype.sendAsBinary = function (string) {
+    var bytes = Array.prototype.map.call(string, function (c) {
+      return c.charCodeAt(0) & 0xff;
+    });
+    this.send(new Uint8Array(bytes).buffer);
+  };
+}
 
 module.exports = function (method, url, headers, data, callback, err, isBinary) {
 
@@ -56,7 +56,8 @@ module.exports = function (method, url, headers, data, callback, err, isBinary) 
     data = null;
   } else if (isBinary) {
     const keyData = data;
-    const code = data.base64Code.replace('data:' + data.type + ';base64,', '');
+    // const code = data.base64Code.replace('data:' + data.type + ';base64,', '');
+    const code = data.base64Code.split("base64,")[1]
     data = ['--' + boundary, 'Content-Disposition: form-data; name="' + data.filed + '"; filename="' + data.filename + '"', 'Content-Type: ' + data.type, '', window.atob(code), ''].join('\r\n');
     const keyArr = Object.keys(keyData);
     if (keyArr.length > 4) {
@@ -74,8 +75,7 @@ module.exports = function (method, url, headers, data, callback, err, isBinary) 
   if (binary) {
     if ('responseType' in r) {
       r.responseType = binary;
-    }
-    else {
+    } else {
       r.overrideMimeType('text/plain; charset=x-user-defined');
     }
   }
